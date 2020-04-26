@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elk-kibana
+spec:
+  selector:
+    matchLabels:
+      app: elk-kibana
+  template:
+    metadata:
+      labels:
+        app: elk-kibana
+    spec:
+      containers:
+      - name: elk-kibana
+        image: antonioazambuja/kibana:7.4.2
+        ports:
+        - containerPort: 5601
+      nodeSelector:
+        kops.k8s.io/instancegroup: nodes
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elk-kibana
+spec:
+  selector:
+    app: elk-kibana
+  ports:
+  - port: 5601
+    targetPort: 5601
+  type: LoadBalancer

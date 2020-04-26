@@ -1,0 +1,49 @@
+{
+    "variables" : {
+        "docker_username" : "{{env `DOCKER_USERNAME`}}",
+        "docker_password" : "{{env `DOCKER_PASSWORD`}}"
+    },
+    "builders": [
+    {
+      "type": "docker",
+      "image": "ubuntu:18.04",
+      "commit": "true",
+      "changes": [
+        "USER logstash",
+        "WORKDIR /home/logstash/logstash-7.4.2",
+        "EXPOSE 5401",
+        "ENTRYPOINT [\"/bin/bash\", \"-c\", \"bin/logstash -f config/logstash.conf\"]"
+      ]
+    }],
+    "provisioners": [
+        {
+            "type": "file",
+            "source": "./provisioner",
+            "destination": "$HOME"
+        },
+        {
+            "type": "shell",
+            "inline": ["apt-get update -y && apt-get install python3 -y && apt-get install ansible -y"]
+        },
+        {
+            "type": "ansible-local",
+            "playbook_dir": "provisioner",
+            "playbook_file": "./provisioner/playbook.yml"
+        }
+    ],
+    "post-processors": [
+        [
+            {
+                "type": "docker-tag",
+                "repository": "{{user `docker_username`}}/logstash",
+                "tag": "7.4.2"
+            },
+            {
+                "type": "docker-push",
+                "login": "true",
+                "login_username": "{{user `docker_username`}}",
+                "login_password": "{{user `docker_password`}}"
+            }
+        ]
+    ]
+  }

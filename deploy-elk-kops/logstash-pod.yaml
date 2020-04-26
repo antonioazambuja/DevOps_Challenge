@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elk-logstash
+spec:
+  selector:
+    matchLabels:
+      app: elk-logstash
+  template:
+    metadata:
+      labels:
+        app: elk-logstash
+    spec:
+      containers:
+      - name: elk-logstash
+        image: antonioazambuja/logstash:7.4.2
+        ports:
+        - containerPort: 5401
+      nodeSelector:
+        kops.k8s.io/instancegroup: nodes
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elk-logstash
+spec:
+  selector:
+    app: elk-logstash
+  ports:
+  - name: logs
+    port: 5401
+    targetPort: 5401
+  type: LoadBalancer

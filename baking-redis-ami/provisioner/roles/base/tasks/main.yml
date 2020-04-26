@@ -1,0 +1,4 @@
+---
+- name: Update Alpine Linux
+  yum:
+    update_cache: yes

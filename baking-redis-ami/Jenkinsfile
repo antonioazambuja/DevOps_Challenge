@@ -1,0 +1,10 @@
+pipeline {
+    agent any
+    stages {
+        stage('Redis cluster provision') {
+            steps {
+                sh("cd 3-devops/antonio-azambuja/tema20/baking-redis-ami/ && packer build redis.json")
+            }
+        }
+    }
+}

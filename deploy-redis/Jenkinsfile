@@ -1,0 +1,18 @@
+pipeline {
+    agent any
+    stages {
+        stage('Redis clusters deploy') {
+            steps {
+                script {
+                env.TYPE = input message: 'Type of run Terraform Hashicorp: ', ok: 'Release!',
+                    parameters: [choice(name: 'TYPE', choices: 'apply\ndestroy', description: 'Type of run Terraform Hashicorp!')]
+                if (env.TYPE == 'apply') {
+                    sh("cd 3-devops/antonio-azambuja/tema20/deploy-redis/ && terraform init && terraform apply -var=\"REDIS_MASTER_PASSWORD=$REDIS_MASTER_PASSWORD\" -var=\"REDIS_SLAVE_PASSWORD=$REDIS_SLAVE_PASSWORD\" -auto-approve")
+                } else {
+                    sh("cd 3-devops/antonio-azambuja/tema20/deploy-redis/ && terraform destroy -auto-approve")
+                }
+            }
+            }
+        }
+    }
+}

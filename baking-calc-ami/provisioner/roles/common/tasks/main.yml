@@ -1,0 +1,4 @@
+---
+- name: Update Centos Linux
+  yum:
+    update_cache: yes

@@ -1,0 +1,44 @@
+---
+- name: Add user for logstash
+  user:
+    name: logstash
+    comment: Logstash User
+    uid: "1000"
+
+- name: Download logstash
+  unarchive:
+    src: https://artifacts.elastic.co/downloads/logstash/logstash-{{ logstash_version }}.tar.gz
+    dest: /home/logstash
+    remote_src: yes
+    validate_certs: False
+    owner: logstash
+
+- name: Change config conf logstash
+  blockinfile:
+    path: /home/logstash/logstash-{{ logstash_version }}/config/logstash.conf
+    block: |
+        input {
+          tcp {
+            port => 5401
+          }
+        }
+
+        output {
+          elasticsearch {
+            hosts => ["http://elk-elasticsearch:9200"]
+            index => "microservice-calculator-%{+YYYY.MM.dd}"
+          }
+        }
+    insertafter: EOF
+    create: yes
+
+- name: Change config yml logstash
+  blockinfile:
+    path: /home/logstash/logstash-{{ logstash_version }}/config/logstash.yml
+    block: |
+        ---
+        http.host: "0.0.0.0"
+        xpack.monitoring.elasticsearch.hosts: [ "http://elk-elasticsearch:9200" ]
+        xpack.monitoring.enabled: false
+    insertafter: EOF
+    create: yes

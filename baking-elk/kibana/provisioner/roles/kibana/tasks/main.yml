@@ -1,0 +1,26 @@
+---
+- name: Add user for kibana
+  user:
+    name: kibana
+    comment: kibana User
+    uid: "1000"
+
+- name: Download kibana
+  unarchive:
+    src: https://artifacts.elastic.co/downloads/kibana/kibana-{{ kibana_version }}-linux-x86_64.tar.gz
+    dest: /home/kibana
+    remote_src: yes
+    owner: kibana
+
+- name: Change config kibana
+  blockinfile:
+    path: /home/kibana/kibana-{{ kibana_version }}-linux-x86_64/config/kibana.yml
+    block: |
+        ---
+        server.name: elk-kibana
+        server.host: "0"
+        elasticsearch.hosts: [ "http://elk-elasticsearch:9200" ]
+        xpack.monitoring.ui.container.elasticsearch.enabled: false  
+    insertafter: EOF
+    create: yes
+  

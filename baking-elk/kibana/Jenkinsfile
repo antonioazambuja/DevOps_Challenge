@@ -1,0 +1,10 @@
+pipeline {
+    agent any
+    stages {
+        stage('ELK Kibana provision') {
+            steps {
+                sh("cd 3-devops/antonio-azambuja/tema20/baking-elk/kibana/ && packer build kibana.json")
+            }
+        }
+    }
+}

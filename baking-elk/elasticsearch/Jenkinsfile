@@ -1,0 +1,10 @@
+pipeline {
+    agent any
+    stages {
+        stage('ELK Elasticsearch provision') {
+            steps {
+                sh("cd 3-devops/antonio-azambuja/tema20/baking-elk/elasticsearch/ && packer build elasticsearch.json")
+            }
+        }
+    }
+}

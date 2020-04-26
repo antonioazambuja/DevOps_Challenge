@@ -1,0 +1,18 @@
+pipeline {
+   agent any
+   stages {
+      stage('Architecture AWS launch') {
+        steps {
+            script {
+                env.TYPE = input message: 'Type of run Terraform Hashicorp: ', ok: 'Release!',
+                    parameters: [choice(name: 'TYPE', choices: 'apply\ndestroy', description: 'Type of run Terraform Hashicorp!')]
+                if (env.TYPE == 'apply') {
+                    sh("cd 3-devops/antonio-azambuja/tema20/baking-infrastructure/ && terraform init && terraform apply -auto-approve")
+                } else {
+                    sh("cd 3-devops/antonio-azambuja/tema20/baking-infrastructure/ && terraform destroy -auto-approve")
+                }
+            }
+        }
+      }
+   }
+}

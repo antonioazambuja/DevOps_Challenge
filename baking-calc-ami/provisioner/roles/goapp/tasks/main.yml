@@ -1,0 +1,19 @@
+---
+- name: Download Golang
+  become: yes
+  unarchive:
+    src: https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
+    dest: /usr/local
+    remote_src: yes
+
+- name: Install Git
+  become: yes
+  yum:
+    name: git
+    state: present
+
+- name: Set enviroment variable
+  shell: export GOROOT=/usr/local/go
+
+- name: Download Golang librarys
+  shell: export GOROOT=/usr/local/go && /usr/local/go/bin/go get -u github.com/gorilla/mux && /usr/local/go/bin/go get -u github.com/go-redis/redis

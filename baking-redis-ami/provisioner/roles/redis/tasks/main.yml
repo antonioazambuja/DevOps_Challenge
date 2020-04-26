@@ -1,0 +1,119 @@
+---
+- name: Install depedencies for Redis (GCC)
+  become: yes
+  shell: yum group install -y "Development Tools"
+
+- name: Download Redis
+  become: yes
+  unarchive:
+    src: http://download.redis.io/releases/redis-{{ redis_version }}.tar.gz
+    dest: /
+    remote_src: yes
+
+- name: make Redis
+  become: yes
+  make: 
+    chdir: /redis-{{ redis_version }}
+  
+- name: make install Redis
+  become: yes
+  make:
+    chdir: /redis-{{ redis_version }}
+    target: install
+
+- name: Create .redis folder
+  file:
+    path: /home/ec2-user/.redis
+    owner: ec2-user
+    state: directory
+    mode: '0755'
+
+- name: Create Redis log file
+  file:
+    path: /home/ec2-user/.redis/redis.log
+    state: touch
+    mode: u=rw,g=r,o=r
+
+- name: redis.conf - dir of rdb
+  become: yes
+  lineinfile:
+    dest: /redis-{{ redis_version }}/redis.conf
+    regexp: '^(.*)dir ./(.*)$'
+    line: dir /home/ec2-user/.redis
+    insertafter: EOF   
+
+- name: redis.conf - logfile
+  become: yes
+  lineinfile:
+    dest: /redis-{{ redis_version }}/redis.conf
+    regexp: '^(.*)logfile ""(.*)$'
+    line: logfile "/home/ec2-user/.redis/redis.log"
+    insertafter: EOF    
+
+- name: redis.conf - bind
+  become: yes
+  lineinfile:
+    dest: /redis-{{ redis_version }}/redis.conf
+    regexp: '^(.*)# bind 127.0.0.1 ::1(.*)$'
+    line: bind 0.0.0.0 ::1
+    insertafter: EOF
+
+- name: redis.conf - bind
+  become: yes
+  lineinfile:
+    dest: /redis-{{ redis_version }}/redis.conf
+    regexp: '^(.*)bind 127.0.0.1(.*)$'
+    line: '# bind 127.0.0.1'
+    insertafter: EOF
+
+- name: redis.conf - timeout
+  become: yes
+  lineinfile:
+    dest: /redis-{{ redis_version }}/redis.conf
+    regexp: '^(.*)timeout 0(.*)$'
+    line: timeout 1000
+    insertafter: EOF
+
+- name: Create service for run Redis
+  become: yes
+  blockinfile:
+    dest: /etc/systemd/system/redis.service
+    block: |
+      [Unit]
+      Description=Redis service
+      After=network.target
+      StartLimitIntervalSec=0
+
+      [Service]
+      Type=simple
+      Restart=always
+      RestartSec=1
+      User=ec2-user
+      ExecStart=/usr/local/bin/redis-server /redis-{{ redis_version }}/redis.conf
+
+      [Install]
+      WantedBy=multi-user.target
+    insertafter: EOF
+    create: yes
+
+- name: Install logrotate
+  become: yes
+  yum:
+    name: logrotate
+    state: present
+
+- name: Configuration for Redis in Logrotate
+  become: yes
+  blockinfile:
+    dest: /etc/logrotate.d/redis
+    block: |
+      /home/ec2-user/.redis/*.log {
+          daily
+          missingok
+          rotate 3
+          compress
+          notifempty
+          create 0644 ec2-user ec2-user
+      }
+    insertafter: EOF
+    create: yes

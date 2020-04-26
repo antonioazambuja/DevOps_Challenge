@@ -1,0 +1,42 @@
+{
+    "variables" : {
+        "user-aws" : "{{env `AWSAcessKeyId`}}",
+        "password-aws" : "{{env `AWSSecretKey`}}"
+    },
+    "builders" : [
+        {
+            "name" : "redis",
+            "type" : "amazon-ebs",
+            "region" : "us-east-2",
+            "access_key": "{{user `user-aws`}}",
+            "secret_key": "{{user `password-aws`}}",
+            "ssh_username" : "ec2-user",
+            "source_ami": "ami-00c03f7f7f2ec15c3",
+            "ami_name" : "redis",
+            "ami_description" : "Amazon Linux Image with Redis cluster",
+            "instance_type": "t2.micro",
+            "tags" : {
+                "Name": "redis",
+                "OS_Version": "Amazon Linux/CentOs",
+                "Release": "1",
+                "Author" : "AntonioAzambuja"
+            }
+        }
+    ],
+    "provisioners" : [
+        {
+            "type": "file",
+            "source": "./provisioner",
+            "destination": "$HOME"
+        },
+        {
+            "type": "shell",
+            "inline": ["sudo amazon-linux-extras install -y ansible2"]
+        },
+        {
+            "type": "ansible-local",
+            "playbook_dir": "provisioner",
+            "playbook_file": "./provisioner/playbook.yml"
+        }
+    ]
+}

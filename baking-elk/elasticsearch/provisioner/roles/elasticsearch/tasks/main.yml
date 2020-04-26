@@ -1,0 +1,28 @@
+---
+- name: Add user for elasticsearch
+  user:
+    name: elasticsearch
+    comment: Elasticsearch User
+    uid: "1000"
+
+- name: Download elasticsearch
+  unarchive:
+    src: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ elasticsearch_version }}-linux-x86_64.tar.gz
+    dest: /home/elasticsearch
+    remote_src: yes
+    validate_certs: False
+    owner: elasticsearch
+
+- name: Change config elasticsearch
+  blockinfile:
+    path: /home/elasticsearch/elasticsearch-{{ elasticsearch_version }}/config/elasticsearch.yml
+    block: |
+        ---
+        cluster.name: "elk-elasticsearch"
+        network.host: 0.0.0.0
+        discovery.type: single-node
+        xpack.license.self_generated.type: trial
+        xpack.security.enabled: false
+        xpack.monitoring.collection.enabled: true
+    insertafter: EOF
+    create: yes

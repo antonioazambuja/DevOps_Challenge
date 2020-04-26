@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elk-elasticsearch
+spec:
+  selector:
+    matchLabels:
+      app: elk-elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elk-elasticsearch
+    spec:
+      containers:
+      - name: elk-elasticsearch
+        image: antonioazambuja/elasticsearch:7.4.2
+        ports:
+        - containerPort: 9200
+      nodeSelector:
+        kops.k8s.io/instancegroup: nodes
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elk-elasticsearch
+spec:
+  selector:
+    app: elk-elasticsearch
+  ports:
+  - port: 9200
+    targetPort: 9200
+  type: LoadBalancer

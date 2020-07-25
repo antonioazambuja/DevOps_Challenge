@@ -197,6 +197,6 @@ Default port: `5601`
 $ kubectl describe svc elk-logstash | grep "LoadBalancer Ingress:" | awk '{print $3;}'
 ```
 
-Live Demo: https://youtu.be/p9ALyNexXMM
+<!-- Live Demo: https://youtu.be/p9ALyNexXMM -->
 
 Thanks!
